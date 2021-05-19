@@ -165,7 +165,8 @@ class ProjectsController extends Controller
     public function removeRecords()
     {
         $delete_projects = (new DeleteProjectJob())->delay(Carbon::now()->addSeconds(3));
-        if($delete_projects){
+
+        if(dispatch($delete_projects)){
             return response()->json([
                 'status' => true,
                 'data' => [],

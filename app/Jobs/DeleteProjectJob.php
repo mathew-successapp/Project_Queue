@@ -35,6 +35,6 @@ class DeleteProjectJob implements ShouldQueue
     {
         $user_id = Auth::user()->id;
         $user = User::find($user_id);
-        $user->allprojects()->orderBy('id')->first()->delete();
+        $user->allprojects()->orderBy('id')->take(5)->delete();
     }
 }
