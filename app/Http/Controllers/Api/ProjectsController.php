@@ -21,7 +21,7 @@ class ProjectsController extends Controller
     public function index()
     {
         $user_id = Auth::user()->id;
-        $user = User::find($user_id)->first();
+        $user = User::find($user_id); 
         $projects = $user->allprojects;
 
         if(!empty($projects)){
