@@ -9,7 +9,10 @@ use App\Model\Project;
 use Webpatser\Uuid\Uuid;
 use Auth;
 use App\Jobs\DeleteProjectJob;
+use App\Jobs\UpdateProjectStatus;
 use Carbon\Carbon;
+use App\Http\Requests\ProjectStoreRequest;
+use App\Http\Requests\UpdateProjectRequest;
 
 class ProjectsController extends Controller
 {
@@ -21,8 +24,7 @@ class ProjectsController extends Controller
     public function index()
     {
         $user_id = Auth::user()->id;
-        $user = User::find($user_id); 
-        $projects = $user->allprojects;
+        $projects = Project::where('user_id',$user_id)->get();
 
         if(!empty($projects)){
             return response()->json([
@@ -31,13 +33,11 @@ class ProjectsController extends Controller
                 'message' => ''
             ]);
         }
-        else{
-            return response()->json([
-                'status' => false,
-                'data' => [],
-                'message' => 'No records found'
-            ]);
-        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'No records found'
+        ]);
     }
 
     /**
@@ -56,30 +56,26 @@ class ProjectsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProjectStoreRequest $request) 
     {
-        $user_id = Auth::user()->id;
-        $user = User::findOrFail($user_id);
         $project = new Project();
-        $project->user_id = $user_id;
-        $project->project_title = $request->project_title;
+        $project->user_id = Auth::user()->id; 
+        $project->title = $request->title;
         $project->due_date = $request->due_date;
         $project->status = $request->status;
 
-        if($user->project()->save($project)){
+        if($project->save()){
             return response()->json([
                 'status' => true,
                 'data' => [],
                 'message' => 'Project saved successfully.'
             ]);
         }
-        else{
-            return response()->json([
-                'status' => false,
-                'data' => [],
-                'message' => 'Project save Failed'
-            ]);
-        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Project save Failed'
+        ]);
     }
 
     /**
@@ -90,7 +86,20 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-        //
+        $user_id = Auth::user()->id;
+        $project = Project::where('user_id',$user_id)->where('id',$id)->first();
+        if(!empty($project)){
+            return response()->json([
+                'status' => true,
+                'data' => $project,
+                'message' => ''
+            ]);
+        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'No records found'
+        ]);
     }
 
     /**
@@ -111,11 +120,11 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(UpdateProjectRequest $request)
     {
         $project = Project::where('id',$request->id)->first(); //  dd($project);
         $project->user_id = Auth::user()->id;
-        $project->project_title = $request->project_title;
+        $project->title = $request->title;
         $project->due_date = $request->due_date;
         $project->status = $request->status;
 
@@ -126,13 +135,11 @@ class ProjectsController extends Controller
                 'message' => 'Project saved successfully.'
             ]);
         }
-        else{
-            return response()->json([
-                'status' => false,
-                'data' => [],
-                'message' => 'Project save Failed'
-            ]);
-        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Project save Failed'
+        ]);
     }
 
     /**
@@ -144,41 +151,52 @@ class ProjectsController extends Controller
     public function destroy($id)
     {
         $user_id = Auth::user()->id;
-        $user = User::find($user_id);
+        $project = Project::where('user_id', $user_id)->where('id',$id)->first();
         
-        if($user->allprojects()->where('id',$id)->delete()){
+        if($project->delete()){ 
             return response()->json([
                 'status' => true,
                 'data' => [],
                 'message' => 'Record deleted successfully'
             ]);
         }
-        else{
-            return response()->json([
-                'status' => false,
-                'data' => [],
-                'message' => 'Something went wrong'
-            ]);
-        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Something went wrong'
+        ]);
     }
 
     public function removeRecords()
     {
-        $delete_projects = (new DeleteProjectJob())->delay(Carbon::now()->addSeconds(3));
-
-        if(dispatch($delete_projects)){
+        //sleep(20);
+        if(DeleteProjectJob::dispatch()){
             return response()->json([
                 'status' => true,
                 'data' => [],
-                'message' => 'Record deleted successfully'
+                'message' => 'Project deletion is started'
             ]);
         }
-        else{
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Something went wrong'
+        ]);
+    }
+
+    public function updateStatus()
+    {
+        if(UpdateProjectStatus::dispatch()){
             return response()->json([
-                'status' => false,
+                'status' => true,
                 'data' => [],
-                'message' => 'Something went wrong'
+                'message' => 'Project status updation is started'
             ]);
         }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Something went wrong'
+        ]);
     }
 }

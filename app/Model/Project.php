@@ -3,25 +3,29 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
-use Webpatser\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
-    protected $table = 'projects';
+    protected $fillable = ['user_id','title','due_date','status','created_at','updated_at'];
 
-    protected $fillable = ['id','user_id','project_title','due_date','status','created_at','updated_at'];
+    protected static function boot()
+    {
+        parent::boot();
 
-    public static function boot()
-	{
-	    parent::boot();
-	    self::creating(function ($model) {
-	        $model->id = Uuid::generate(1)->time;
-	    });
-	}
+        static::creating(function ($model) {
+            $model->{$model->getKeyName()} = (string) Str::uuid();
+        });
+    }
 
-	public function getRouteKeyName()
-	{
-	    return 'uuid';
-	}
+    public function getIncrementing()
+    {
+        return false;
+    }
+
+    public function getKeyType()
+    {
+        return 'string';
+    }
 
 }

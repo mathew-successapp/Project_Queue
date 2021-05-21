@@ -9,8 +9,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Model\Project;
 use Illuminate\Support\Str;
+use Carbon\carbon;
 
-class DeleteProjectJob implements ShouldQueue
+class UpdateProjectStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -31,6 +32,8 @@ class DeleteProjectJob implements ShouldQueue
      */
     public function handle()
     {
-        Project::orderBy('created_at')->take(5)->delete();
+        $status = Project::where('created_at', '<=', Carbon::now()->subDay())
+        ->where('status', '!=', 3)
+        ->update(['status' => 3]);
     }
 }

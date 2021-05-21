@@ -29,7 +29,9 @@ Route::get('logout', 'Api\UserController@logout')->middleware('auth:api');
 Route::get('projects', 'Api\ProjectsController@index')->middleware('auth:api');
 Route::post('add_project','Api\ProjectsController@store')->middleware('auth:api');
 Route::post('update_project','Api\ProjectsController@update')->middleware('auth:api');
+Route::get('view_project/{id}', 'Api\ProjectsController@show')->middleware('auth:api');
 Route::get('delete_project/{id}', 'Api\ProjectsController@destroy')->middleware('auth:api');
 
 Route::get('remove_records', 'Api\ProjectsController@removeRecords')->middleware('auth:api');
+Route::get('update_status', 'Api\ProjectsController@updateStatus');
 
