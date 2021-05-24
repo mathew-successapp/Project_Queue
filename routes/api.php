@@ -35,3 +35,8 @@ Route::get('delete_project/{id}', 'Api\ProjectsController@destroy')->middleware(
 Route::get('remove_records', 'Api\ProjectsController@removeRecords')->middleware('auth:api');
 Route::get('update_status', 'Api\ProjectsController@updateStatus');
 
+Route::get('tasks', 'Api\TasksController@index')->middleware('auth:api');
+Route::post('assign_task','Api\TasksController@store')->middleware('auth:api');
+Route::post('update_task','Api\TasksController@update')->middleware('auth:api');
+Route::get('view_task/{id}', 'Api\TasksController@show')->middleware('auth:api');
+Route::get('delete_task/{id}', 'Api\TasksController@destroy')->middleware('auth:api');

@@ -25,4 +25,14 @@ class HomeController extends Controller
     {
         return view('home');
     }
+
+    public function show($post)
+    {
+        $posts = ['post1' => 'Post new one', 'post2' => 'Post new second', 'post3' => 'Post third'];
+
+        if(! array_key_exists($post, $posts)){
+            abort(404, "Not exists");
+        }
+        return view('post', ['post' => $posts[$post]]);
+    }
 }

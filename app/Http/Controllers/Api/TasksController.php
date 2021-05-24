@@ -4,17 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\User;
-use App\Model\Project;
-use Webpatser\Uuid\Uuid;
-use Auth;
-use App\Jobs\DeleteProjectJob;
-use App\Jobs\UpdateProjectStatus;
-use Carbon\Carbon;
-use App\Http\Requests\ProjectStoreRequest;
-use App\Http\Requests\UpdateProjectRequest;
+use App\Model\Tasks;
+use App\Http\Requests\TaskStoreRequest;
+use App\Http\Requests\TaskUpdateRequest;
 
-class ProjectsController extends Controller
+class TasksController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -23,13 +17,12 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $user_id = Auth::user()->id;
-        $projects = Project::where('user_id',$user_id)->withCount('tasks')->with('tasks')->get();
+        $task = Tasks::with('project')->get()->toArray();
 
-        if(!empty($projects)){
+        if(!empty($task)){
             return response()->json([
                 'status' => true,
-                'data' => $projects,
+                'data' => $task,
                 'message' => ''
             ]);
         }
@@ -56,25 +49,26 @@ class ProjectsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ProjectStoreRequest $request) 
+    public function store(TaskStoreRequest $request)
     {
-        $project = new Project();
-        $project->user_id = Auth::user()->id; 
-        $project->title = $request->title;
-        $project->due_date = $request->due_date;
-        $project->status = $request->status;
+        $task = new Tasks();
+        $task->title = $request->title;
+        $task->description = $request->description;
+        $task->due_date = $request->due_date;
+        $task->assigned_to = $request->assigned_to;
+        $task->project_id = $request->project_id;
 
-        if($project->save()){
+        if($task->save()){
             return response()->json([
                 'status' => true,
                 'data' => [],
-                'message' => 'Project saved successfully.'
+                'message' => 'Task assigned successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
             'data' => [],
-            'message' => 'Project save Failed'
+            'message' => 'Task assign Failed'
         ]);
     }
 
@@ -86,12 +80,11 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-        $user_id = Auth::user()->id;
-        $project = Project::where('user_id',$user_id)->where('id',$id)->first();
-        if(!empty($project)){
+        $task = Tasks::where('id',$id)->first();
+        if(!empty($task)){
             return response()->json([
                 'status' => true,
-                'data' => $project,
+                'data' => $task,
                 'message' => ''
             ]);
         }
@@ -120,25 +113,26 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProjectRequest $request)
+    public function update(TaskUpdateRequest $request)
     {
-        $project = Project::where('id',$request->id)->first(); //  dd($project);
-        $project->user_id = Auth::user()->id;
-        $project->title = $request->title;
-        $project->due_date = $request->due_date;
-        $project->status = $request->status;
+        $task = Tasks::find($request->id);
+        $task->title = $request->title;
+        $task->description = $request->description;
+        $task->due_date = $request->due_date;
+        $task->assigned_to = $request->assigned_to;
+        $task->project_id = $request->project_id;
 
-        if($project->save()){
+        if($task->save()){
             return response()->json([
                 'status' => true,
                 'data' => [],
-                'message' => 'Project saved successfully.'
+                'message' => 'Task saved successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
             'data' => [],
-            'message' => 'Project save Failed'
+            'message' => 'Task assign Failed'
         ]);
     }
 
@@ -150,47 +144,13 @@ class ProjectsController extends Controller
      */
     public function destroy($id)
     {
-        $user_id = Auth::user()->id;
-        $project = Project::where('user_id', $user_id)->where('id',$id)->first();
+        $task = Tasks::findOrFail($id);
         
-        if($project->delete()){ 
+        if($task->delete()){ 
             return response()->json([
                 'status' => true,
                 'data' => [],
                 'message' => 'Record deleted successfully'
-            ]);
-        }
-        return response()->json([
-            'status' => false,
-            'data' => [],
-            'message' => 'Something went wrong'
-        ]);
-    }
-
-    public function removeRecords()
-    {
-        //sleep(20);
-        if(DeleteProjectJob::dispatch()){
-            return response()->json([
-                'status' => true,
-                'data' => [],
-                'message' => 'Project deletion is started'
-            ]);
-        }
-        return response()->json([
-            'status' => false,
-            'data' => [],
-            'message' => 'Something went wrong'
-        ]);
-    }
-
-    public function updateStatus()
-    {
-        if(UpdateProjectStatus::dispatch()){
-            return response()->json([
-                'status' => true,
-                'data' => [],
-                'message' => 'Project status updation is started'
             ]);
         }
         return response()->json([

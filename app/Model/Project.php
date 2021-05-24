@@ -28,4 +28,8 @@ class Project extends Model
         return 'string';
     }
 
+    public function tasks(){
+      return $this->hasMany('App\Model\Tasks','project_id');
+    }
+
 }

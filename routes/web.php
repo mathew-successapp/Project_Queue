@@ -20,7 +20,17 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/posts/{post}', 'HomeController@show');
 
-Auth::routes();
+/*Route::get('/post/{post}', function($post){
+	$posts = ['post1' => 'post new', 'post2' => 'post new tec'];
 
-Route::get('/home', 'HomeController@index')->name('home');
+	if(!in_array($post, $posts)){
+		abort(404, 'Not available using in_array');
+	}
+	/*if(!array_key_exists($post, $posts)){
+		abort(404, "Post is not available");
+	}*/
+/*
+	return $posts[$post];
+});*/
