@@ -28,8 +28,8 @@ class TaskUpdateRequest extends FormRequest
         return [
             'id' => 'required',
             'title' => 'required',
-            'due_date' => 'required',
-            'assigned_to' => 'required',
+            'due_date' => 'required|date_format:Y-m-d',
+            'assignee_id' => 'required',
             'project_id' => 'required',
         ];
     }

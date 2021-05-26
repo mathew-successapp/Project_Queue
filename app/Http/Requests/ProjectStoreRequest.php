@@ -27,7 +27,7 @@ class ProjectStoreRequest extends FormRequest
     {
         return [
             'title' => 'required',
-            'due_date' => 'required',
+            'due_date' => 'required|date_format:Y-m-d',
             'status' => 'required',
         ];
     }

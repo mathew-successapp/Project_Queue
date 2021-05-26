@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Model\Tasks;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
+use App\Http\Requests\CreateTaskRequest;
 
 class TasksController extends Controller
 {
@@ -38,9 +39,23 @@ class TasksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(CreateTaskRequest $request)
     {
-        //
+        $task = new Tasks();
+        $task->title = $request->title;
+
+        if($task->save()){
+            return response()->json([
+                'status' => true,
+                'data' => [],
+                'message' => 'Task created successfully.'
+            ]);
+        }
+        return response()->json([
+            'status' => false,
+            'data' => [],
+            'message' => 'Task creation Failed'
+        ]);
     }
 
     /**
@@ -51,11 +66,11 @@ class TasksController extends Controller
      */
     public function store(TaskStoreRequest $request)
     {
-        $task = new Tasks();
+        $task = Tasks::findOrFail($request->id);
         $task->title = $request->title;
         $task->description = $request->description;
         $task->due_date = $request->due_date;
-        $task->assigned_to = $request->assigned_to;
+        $task->assignee_id = $request->assignee_id;
         $task->project_id = $request->project_id;
 
         if($task->save()){
@@ -119,7 +134,7 @@ class TasksController extends Controller
         $task->title = $request->title;
         $task->description = $request->description;
         $task->due_date = $request->due_date;
-        $task->assigned_to = $request->assigned_to;
+        $task->assignee_id = $request->assignee_id;
         $task->project_id = $request->project_id;
 
         if($task->save()){
