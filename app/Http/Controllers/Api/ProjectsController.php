@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\User;
 use App\Model\Project;
-use Webpatser\Uuid\Uuid;
-use Auth;
 use App\Jobs\DeleteProjectJob;
 use App\Jobs\UpdateProjectStatus;
-use Carbon\Carbon;
 use App\Http\Requests\ProjectStoreRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use Carbon\Carbon;
+use Auth;
 
 class ProjectsController extends Controller
 {
@@ -24,18 +23,18 @@ class ProjectsController extends Controller
     public function index()
     {
         $user_id = Auth::user()->id;
-        $projects = Project::where('user_id',$user_id)->withCount('tasks')->with('tasks')->get();
+        $projects = Project::where('user_id',$user_id)
+                            ->withCount('tasks')
+                            ->with('tasks')->get()->toArray();
 
         if(!empty($projects)){
             return response()->json([
                 'status' => true,
-                'data' => $projects,
-                'message' => ''
+                'data' => $projects
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'No records found'
         ]);
     }
@@ -67,13 +66,11 @@ class ProjectsController extends Controller
         if($project->save()){
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Project saved successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Project save Failed'
         ]);
     }
@@ -120,9 +117,9 @@ class ProjectsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProjectRequest $request)
+    public function update(UpdateProjectRequest $request, $id)
     {
-        $project = Project::where('id',$request->id)->first(); //  dd($project);
+        $project = Project::where('id',$id)->first(); 
         $project->user_id = Auth::user()->id;
         $project->title = $request->title;
         $project->due_date = $request->due_date;
@@ -131,13 +128,11 @@ class ProjectsController extends Controller
         if($project->save()){
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Project saved successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Project save Failed'
         ]);
     }
@@ -156,47 +151,28 @@ class ProjectsController extends Controller
         if($project->delete()){ 
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Record deleted successfully'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Something went wrong'
         ]);
     }
 
     public function removeRecords()
     {
-        //sleep(20);
-        if(DeleteProjectJob::dispatch()){
-            return response()->json([
-                'status' => true,
-                'data' => [],
-                'message' => 'Project deletion is started'
-            ]);
-        }
         return response()->json([
-            'status' => false,
-            'data' => [],
-            'message' => 'Something went wrong'
+            'status' => DeleteProjectJob::dispatch(),
+            'message' => 'Project deletion is started'
         ]);
     }
 
     public function updateStatus()
     {
-        if(UpdateProjectStatus::dispatch()){
-            return response()->json([
-                'status' => true,
-                'data' => [],
-                'message' => 'Project status updation is started'
-            ]);
-        }
         return response()->json([
-            'status' => false,
-            'data' => [],
-            'message' => 'Something went wrong'
+            'status' => UpdateProjectStatus::dispatch(),
+            'message' => 'Project status updation is started'
         ]);
     }
 }

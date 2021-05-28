@@ -26,11 +26,10 @@ class TaskUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required',
-            'title' => 'required',
-            'due_date' => 'required|date_format:Y-m-d',
-            'assignee_id' => 'required',
-            'project_id' => 'required',
+            'title' => 'sometimes',
+            'due_date' => 'sometimes|date_format:Y-m-d',
+            'assignee_id' => 'sometimes',
+            'project_id' => 'sometimes',
         ];
     }
 

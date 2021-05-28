@@ -23,13 +23,11 @@ class TasksController extends Controller
         if(!empty($task)){
             return response()->json([
                 'status' => true,
-                'data' => $task,
-                'message' => ''
+                'data' => $task
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'No records found'
         ]);
     }
@@ -47,13 +45,11 @@ class TasksController extends Controller
         if($task->save()){
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Task created successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Task creation Failed'
         ]);
     }
@@ -64,9 +60,9 @@ class TasksController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(TaskStoreRequest $request)
+    public function store(TaskStoreRequest $request, $id)
     {
-        $task = Tasks::findOrFail($request->id);
+        $task = Tasks::findOrFail($id);
         $task->title = $request->title;
         $task->description = $request->description;
         $task->due_date = $request->due_date;
@@ -76,13 +72,11 @@ class TasksController extends Controller
         if($task->save()){
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Task assigned successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Task assign Failed'
         ]);
     }
@@ -99,13 +93,11 @@ class TasksController extends Controller
         if(!empty($task)){
             return response()->json([
                 'status' => true,
-                'data' => $task,
-                'message' => ''
+                'data' => $task
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'No records found'
         ]);
     }
@@ -128,9 +120,9 @@ class TasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(TaskUpdateRequest $request)
+    public function update(TaskUpdateRequest $request, $id)
     {
-        $task = Tasks::find($request->id);
+        $task = Tasks::find($id);
         $task->title = $request->title;
         $task->description = $request->description;
         $task->due_date = $request->due_date;
@@ -140,14 +132,12 @@ class TasksController extends Controller
         if($task->save()){
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Task saved successfully.'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
-            'message' => 'Task assign Failed'
+            'message' => 'Task update Failed'
         ]);
     }
 
@@ -164,13 +154,11 @@ class TasksController extends Controller
         if($task->delete()){ 
             return response()->json([
                 'status' => true,
-                'data' => [],
                 'message' => 'Record deleted successfully'
             ]);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'Something went wrong'
         ]);
     }

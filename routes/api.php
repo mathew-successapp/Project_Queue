@@ -18,26 +18,32 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// User Login & Registration
-Route::post('login','Api\UserController@login');   
-Route::post('register','Api\UserController@register');
-
-// Logout 
-Route::get('logout', 'Api\UserController@logout')->middleware('auth:api');
+// User Login, Registration & Logout
+Route::group(['prefix' => 'auth'], function(){
+	Route::post('login','Api\UserController@login');   
+	Route::post('register','Api\UserController@register');
+	Route::get('logout', 'Api\UserController@logout')->middleware('auth:api');
+});
 
 // Project
-Route::get('projects', 'Api\ProjectsController@index')->middleware('auth:api');
-Route::post('add_project','Api\ProjectsController@store')->middleware('auth:api');
-Route::post('update_project','Api\ProjectsController@update')->middleware('auth:api');
-Route::get('view_project/{id}', 'Api\ProjectsController@show')->middleware('auth:api');
-Route::get('delete_project/{id}', 'Api\ProjectsController@destroy')->middleware('auth:api');
+Route::group(['prefix' => 'projects', 'middleware' => ['auth:api']], function(){
+	Route::get('/', 'Api\ProjectsController@index');
+	Route::post('/add','Api\ProjectsController@store');
+	Route::patch('/{id}/edit','Api\ProjectsController@update');
+	Route::get('/{id}/view', 'Api\ProjectsController@show');
+	Route::delete('/{id}/delete', 'Api\ProjectsController@destroy');
+});
 
-Route::get('remove_records', 'Api\ProjectsController@removeRecords')->middleware('auth:api');
-Route::get('update_status', 'Api\ProjectsController@updateStatus');
+Route::group(['prefix' => 'jobs'], function(){
+	Route::delete('delete', 'Api\ProjectsController@removeRecords');
+	Route::patch('update', 'Api\ProjectsController@updateStatus');
+});
 
-Route::get('tasks', 'Api\TasksController@index')->middleware('auth:api');
-Route::post('create_task','Api\TasksController@create')->middleware('auth:api');
-Route::post('assign_task','Api\TasksController@store')->middleware('auth:api');
-Route::post('update_task','Api\TasksController@update')->middleware('auth:api');
-Route::get('view_task/{id}', 'Api\TasksController@show')->middleware('auth:api');
-Route::get('delete_task/{id}', 'Api\TasksController@destroy')->middleware('auth:api');
+Route::group(['prefix' => 'tasks', 'middleware' => ['auth:api']], function(){
+	Route::get('/', 'Api\TasksController@index');
+	Route::post('/create','Api\TasksController@create');
+	Route::post('/{id}/assign','Api\TasksController@store');
+	Route::patch('/{id}/edit','Api\TasksController@update');
+	Route::get('/{id}/view', 'Api\TasksController@show');
+	Route::delete('/{id}/delete', 'Api\TasksController@destroy');
+});
