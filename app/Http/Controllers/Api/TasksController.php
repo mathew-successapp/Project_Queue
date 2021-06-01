@@ -8,6 +8,7 @@ use App\Model\Tasks;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Requests\CreateTaskRequest;
+use App\Http\Resources\TaskResource;
 
 class TasksController extends Controller
 {
@@ -21,10 +22,7 @@ class TasksController extends Controller
         $task = Tasks::with('project')->get()->toArray();
 
         if(!empty($task)){
-            return response()->json([
-                'status' => true,
-                'data' => $task
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
@@ -43,10 +41,7 @@ class TasksController extends Controller
         $task->title = $request->title;
 
         if($task->save()){
-            return response()->json([
-                'status' => true,
-                'message' => 'Task created successfully.'
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
@@ -70,10 +65,7 @@ class TasksController extends Controller
         $task->project_id = $request->project_id;
 
         if($task->save()){
-            return response()->json([
-                'status' => true,
-                'message' => 'Task assigned successfully.'
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
@@ -91,10 +83,7 @@ class TasksController extends Controller
     {
         $task = Tasks::where('id',$id)->first();
         if(!empty($task)){
-            return response()->json([
-                'status' => true,
-                'data' => $task
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
@@ -130,10 +119,7 @@ class TasksController extends Controller
         $task->project_id = $request->project_id;
 
         if($task->save()){
-            return response()->json([
-                'status' => true,
-                'message' => 'Task saved successfully.'
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
@@ -152,10 +138,7 @@ class TasksController extends Controller
         $task = Tasks::findOrFail($id);
         
         if($task->delete()){ 
-            return response()->json([
-                'status' => true,
-                'message' => 'Record deleted successfully'
-            ]);
+            return new TaskResource($task);
         }
         return response()->json([
             'status' => false,

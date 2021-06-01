@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class Project extends Model
 {
-    protected $fillable = ['user_id','title','due_date','status','created_at','updated_at'];
+    protected $fillable = ['user_id','title','due_date','status'];
 
     protected static function boot()
     {

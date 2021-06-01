@@ -10,6 +10,7 @@ use App\Jobs\DeleteProjectJob;
 use App\Jobs\UpdateProjectStatus;
 use App\Http\Requests\ProjectStoreRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Http\Resources\ProjectResource;
 use Carbon\Carbon;
 use Auth;
 
@@ -28,10 +29,7 @@ class ProjectsController extends Controller
                             ->with('tasks')->get()->toArray();
 
         if(!empty($projects)){
-            return response()->json([
-                'status' => true,
-                'data' => $projects
-            ]);
+            return new ProjectResource($projects);
         }
         return response()->json([
             'status' => false,
@@ -64,10 +62,7 @@ class ProjectsController extends Controller
         $project->status = $request->status;
 
         if($project->save()){
-            return response()->json([
-                'status' => true,
-                'message' => 'Project saved successfully.'
-            ]);
+            return new ProjectResource($project);
         }
         return response()->json([
             'status' => false,
@@ -86,15 +81,10 @@ class ProjectsController extends Controller
         $user_id = Auth::user()->id;
         $project = Project::where('user_id',$user_id)->where('id',$id)->first();
         if(!empty($project)){
-            return response()->json([
-                'status' => true,
-                'data' => $project,
-                'message' => ''
-            ]);
+            return new ProjectResource($project);
         }
         return response()->json([
             'status' => false,
-            'data' => [],
             'message' => 'No records found'
         ]);
     }
@@ -118,18 +108,15 @@ class ProjectsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateProjectRequest $request, $id)
-    {
-        $project = Project::where('id',$id)->first(); 
+    { 
+        $project = Project::findOrFail($id);
         $project->user_id = Auth::user()->id;
         $project->title = $request->title;
         $project->due_date = $request->due_date;
         $project->status = $request->status;
 
         if($project->save()){
-            return response()->json([
-                'status' => true,
-                'message' => 'Project saved successfully.'
-            ]);
+            return new ProjectResource($project);
         }
         return response()->json([
             'status' => false,
@@ -148,11 +135,8 @@ class ProjectsController extends Controller
         $user_id = Auth::user()->id;
         $project = Project::where('user_id', $user_id)->where('id',$id)->first();
         
-        if($project->delete()){ 
-            return response()->json([
-                'status' => true,
-                'message' => 'Record deleted successfully'
-            ]);
+        if($project->delete()){
+            return new ProjectResource($project);
         }
         return response()->json([
             'status' => false,
