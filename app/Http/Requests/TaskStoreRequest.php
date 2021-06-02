@@ -26,10 +26,7 @@ class TaskStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required',
-            'due_date' => 'required|date_format:Y-m-d',
-            'assignee_id' => 'required',
-            'project_id' => 'required',
+            'title' => 'required'
         ];
     }
 

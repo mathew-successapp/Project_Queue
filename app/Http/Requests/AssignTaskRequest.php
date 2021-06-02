@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CreateTaskRequest extends FormRequest
+class AssignTaskRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class CreateTaskRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required',
+            'assignee_id' => 'required|exists:users,id'
         ];
     }
 

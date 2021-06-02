@@ -8,6 +8,7 @@ use App\Model\Tasks;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Requests\CreateTaskRequest;
+use App\Http\Requests\AssignTaskRequest;
 use App\Http\Resources\TaskResource;
 
 class TasksController extends Controller
@@ -27,7 +28,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ]);
+        ], 422);
     }
 
     /**
@@ -35,7 +36,32 @@ class TasksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(CreateTaskRequest $request)
+    public function create()
+    {
+        //
+    }
+
+    public function assign(AssignTaskRequest $request, $id)
+    {
+        $task = Tasks::findOrFail($id); 
+        $task->assignee_id = $request->assignee_id;
+
+        if($task->save()){
+            return new TaskResource($task);
+        }
+        return response()->json([
+            'status' => false,
+            'message' => 'Task creation Failed'
+        ], 422);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(TaskStoreRequest $request)
     {
         $task = new Tasks();
         $task->title = $request->title;
@@ -46,31 +72,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'Task creation Failed'
-        ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(TaskStoreRequest $request, $id)
-    {
-        $task = Tasks::findOrFail($id);
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->due_date = $request->due_date;
-        $task->assignee_id = $request->assignee_id;
-        $task->project_id = $request->project_id;
-
-        if($task->save()){
-            return new TaskResource($task);
-        }
-        return response()->json([
-            'status' => false,
-            'message' => 'Task assign Failed'
-        ]);
+        ], 422);
     }
 
     /**
@@ -88,7 +90,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ]);
+        ], 422);
     }
 
     /**
@@ -111,20 +113,16 @@ class TasksController extends Controller
      */
     public function update(TaskUpdateRequest $request, $id)
     {
-        $task = Tasks::find($id);
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->due_date = $request->due_date;
-        $task->assignee_id = $request->assignee_id;
-        $task->project_id = $request->project_id;
+        $task = Tasks::find($id); 
+        $task->fill($request->validated());
 
-        if($task->save()){
+        if($task){
             return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
             'message' => 'Task update Failed'
-        ]);
+        ], 422);
     }
 
     /**
@@ -135,14 +133,18 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task = Tasks::findOrFail($id);
-        
-        if($task->delete()){ 
-            return new TaskResource($task);
+        $task = Tasks::find($id);
+
+        if(!empty($task)){
+            $task->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Record deleted successfully'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Something went wrong'
-        ]);
+            'message' => 'No record found'
+        ], 422);
     }
 }

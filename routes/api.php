@@ -27,23 +27,21 @@ Route::group(['prefix' => 'auth'], function(){
 
 // Project
 Route::group(['prefix' => 'projects', 'middleware' => ['auth:api']], function(){
-	Route::get('/', 'Api\ProjectsController@index');
-	Route::post('/add','Api\ProjectsController@store');
-	Route::patch('/{id}/edit','Api\ProjectsController@update');
-	Route::get('/{id}/view', 'Api\ProjectsController@show');
-	Route::delete('/{id}/delete', 'Api\ProjectsController@destroy');
+   Route::get('/', 'Api\ProjectsController@index');
+   Route::post('/','Api\ProjectsController@store');
+   Route::patch('/{id}','Api\ProjectsController@update');
+   Route::get('/{id}', 'Api\ProjectsController@show');
+   Route::delete('/{id}', 'Api\ProjectsController@destroy');
 });
-
 Route::group(['prefix' => 'jobs'], function(){
-	Route::delete('delete', 'Api\ProjectsController@removeRecords');
-	Route::patch('update', 'Api\ProjectsController@updateStatus');
+   Route::delete('delete', 'Api\ProjectsController@removeRecords');
+   Route::patch('update', 'Api\ProjectsController@updateStatus');
 });
-
 Route::group(['prefix' => 'tasks', 'middleware' => ['auth:api']], function(){
-	Route::get('/', 'Api\TasksController@index');
-	Route::post('/create','Api\TasksController@create');
-	Route::post('/{id}/assign','Api\TasksController@store');
-	Route::patch('/{id}/edit','Api\TasksController@update');
-	Route::get('/{id}/view', 'Api\TasksController@show');
-	Route::delete('/{id}/delete', 'Api\TasksController@destroy');
+   Route::get('/', 'Api\TasksController@index');
+   Route::post('/','Api\TasksController@store');
+   Route::patch('/{id}/assign','Api\TasksController@assign');
+   Route::patch('/{id}','Api\TasksController@update');
+   Route::get('/{id}', 'Api\TasksController@show');
+   Route::delete('/{id}', 'Api\TasksController@destroy');
 });

@@ -34,7 +34,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ]);
+        ], 422);
     }
 
     /**
@@ -67,7 +67,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'Project save Failed'
-        ]);
+        ], 422);
     }
 
     /**
@@ -86,7 +86,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ]);
+        ], 422);
     }
 
     /**
@@ -110,18 +110,15 @@ class ProjectsController extends Controller
     public function update(UpdateProjectRequest $request, $id)
     { 
         $project = Project::findOrFail($id);
-        $project->user_id = Auth::user()->id;
-        $project->title = $request->title;
-        $project->due_date = $request->due_date;
-        $project->status = $request->status;
+        $project->fill($request->validated());
 
-        if($project->save()){
+        if($project){
             return new ProjectResource($project);
         }
         return response()->json([
             'status' => false,
             'message' => 'Project save Failed'
-        ]);
+        ], 422);
     }
 
     /**
@@ -133,15 +130,19 @@ class ProjectsController extends Controller
     public function destroy($id)
     {
         $user_id = Auth::user()->id;
-        $project = Project::where('user_id', $user_id)->where('id',$id)->first();
+        $project = Project::find($id); 
         
-        if($project->delete()){
-            return new ProjectResource($project);
+        if(!empty($project)){
+            $project->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Record deleted successfully'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Something went wrong'
-        ]);
+            'message' => 'No record found'
+        ], 422);
     }
 
     public function removeRecords()
