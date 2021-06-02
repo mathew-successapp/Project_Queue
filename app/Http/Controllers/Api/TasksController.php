@@ -43,15 +43,15 @@ class TasksController extends Controller
 
     public function assign(AssignTaskRequest $request, $id)
     {
-        $task = Tasks::findOrFail($id); 
-        $task->assignee_id = $request->assignee_id;
-
-        if($task->save()){
+        $task = Tasks::find($id); 
+        if(!empty($task)){
+            $task->assignee_id = $request->assignee_id;
+            $task->save();
             return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Task creation Failed'
+            'message' => 'No records found'
         ], 422);
     }
 
@@ -114,14 +114,13 @@ class TasksController extends Controller
     public function update(TaskUpdateRequest $request, $id)
     {
         $task = Tasks::find($id); 
-        $task->fill($request->validated());
-
-        if($task){
+        if(!empty($task)){ 
+            $task->update($request->validated());
             return new TaskResource($task);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Task update Failed'
+            'message' => 'No records found'
         ], 422);
     }
 

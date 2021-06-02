@@ -110,14 +110,14 @@ class ProjectsController extends Controller
     public function update(UpdateProjectRequest $request, $id)
     { 
         $project = Project::findOrFail($id);
-        $project->fill($request->validated());
-
-        if($project){
+        if(!empty($project)){
+            $project->update($request->validated());
             return new ProjectResource($project);
         }
+
         return response()->json([
             'status' => false,
-            'message' => 'Project save Failed'
+            'message' => 'No records found'
         ], 422);
     }
 

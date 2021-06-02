@@ -19,7 +19,7 @@ class CreateTasksTable extends Migration
             $table->text('description')->nullable();
             $table->date('due_date')->nullable();
             $table->bigInteger('assignee_id')->unsigned()->nullable();
-            $table->string('project_id')->nullable();
+            $table->uuid('project_id')->nullable();
 
             $table->foreign('assignee_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('project_id')->references('id')->on('projects')->cascadeOnDelete();
