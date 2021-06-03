@@ -27,7 +27,10 @@ class TaskStoreRequest extends FormRequest
     {
         return [
             'title' => 'required',
-            'project_id' => 'required|exists:projects,id'
+            'project_id' => 'required|exists:projects,id',
+            'description' => 'nullable',
+            'due_date' => 'nullable|date_format:Y-m-d',
+            'assignee_id' => 'nullable|exists:users,id'
         ];
     }
 

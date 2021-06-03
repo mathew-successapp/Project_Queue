@@ -26,10 +26,10 @@ class ProjectsController extends Controller
         $user_id = Auth::user()->id;
         $projects = Project::where('user_id',$user_id)
                             ->withCount('tasks')
-                            ->with('tasks')->get()->toArray();
+                            ->with('tasks')->get(); //dd($projects->toArray());
 
         if(!empty($projects)){
-            return new ProjectResource($projects);
+            return ProjectResource::collection($projects);
         }
         return response()->json([
             'status' => false,
@@ -79,7 +79,7 @@ class ProjectsController extends Controller
     public function show($id)
     {
         $user_id = Auth::user()->id;
-        $project = Project::where('user_id',$user_id)->where('id',$id)->first();
+        $project = Project::with('tasks')->where('user_id',$user_id)->where('id',$id)->first();
         if(!empty($project)){
             return new ProjectResource($project);
         }

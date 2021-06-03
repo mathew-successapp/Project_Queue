@@ -26,7 +26,12 @@ class AssignTaskRequest extends FormRequest
     public function rules()
     {
         return [
-            'assignee_id' => 'required|exists:users,id'
+            'assignee_id' => 'required|exists:users,id',
+            'title' => 'nullable',
+            'project_id' => 'nullable|exists:projects,id',
+            'description' => 'nullable',
+            'due_date' => 'nullable|date_format:Y-m-d',
+            'assignee_id' => 'nullable|exists:users,id'
         ];
     }
 

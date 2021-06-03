@@ -20,10 +20,10 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $task = Tasks::with('project')->get()->toArray();
+        $task = Tasks::with('project')->get();
 
         if(!empty($task)){
-            return new TaskResource($task);
+            return TaskResource::collection($task);
         }
         return response()->json([
             'status' => false,
@@ -66,6 +66,9 @@ class TasksController extends Controller
         $task = new Tasks();
         $task->title = $request->title;
         $task->project_id = $request->project_id;
+        $task->description = $request->description;
+        $task->due_date = $request->due_date;
+        $task->assignee_id = $request->assignee_id;
 
         if($task->save()){
             return new TaskResource($task);
@@ -84,7 +87,7 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task = Tasks::where('id',$id)->first();
+        $task = Tasks::where('id',$id)->with('project')->first(); 
         if(!empty($task)){
             return new TaskResource($task);
         }
