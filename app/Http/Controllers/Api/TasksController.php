@@ -28,7 +28,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -52,7 +52,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -65,6 +65,7 @@ class TasksController extends Controller
     {
         $task = new Tasks();
         $task->title = $request->title;
+        $task->project_id = $request->project_id;
 
         if($task->save()){
             return new TaskResource($task);
@@ -90,7 +91,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -121,7 +122,7 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -144,6 +145,6 @@ class TasksController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No record found'
-        ], 422);
+        ], 200);
     }
 }

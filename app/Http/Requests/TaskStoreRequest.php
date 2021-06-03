@@ -26,7 +26,8 @@ class TaskStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required'
+            'title' => 'required',
+            'project_id' => 'required|exists:projects,id'
         ];
     }
 

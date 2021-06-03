@@ -34,7 +34,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -86,7 +86,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -118,7 +118,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No records found'
-        ], 422);
+        ], 200);
     }
 
     /**
@@ -142,7 +142,7 @@ class ProjectsController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'No record found'
-        ], 422);
+        ], 200);
     }
 
     public function removeRecords()
