@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Gate;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,8 @@ Route::group(['prefix' => 'tasks', 'middleware' => ['auth:api']], function(){
    Route::patch('/{id}','Api\TasksController@update');
    Route::get('/{id}', 'Api\TasksController@show');
    Route::delete('/{id}', 'Api\TasksController@destroy');
+});
+
+Route::group(['prefix' => 'roles'], function(){
+   Route::patch('/{id}/assign_role','Api\RolesController@assign_roles');
 });

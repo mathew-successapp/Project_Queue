@@ -27,5 +27,17 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Passport::routes();
+
+        Gate::define('isSEM', function($user){
+            return in_array($user->role_id, [1]);
+        });
+
+        Gate::define('isSE', function($user){
+            return in_array($user->role_id, [2]);
+        });
+
+        Gate::define('isClient', function($user){
+            return in_array($user->role_id, [3]);
+        });
     }
 }

@@ -11,6 +11,7 @@ use App\Jobs\UpdateProjectStatus;
 use App\Http\Requests\ProjectStoreRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
+use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
 use Auth;
 
@@ -27,13 +28,19 @@ class ProjectsController extends Controller
         $projects = Project::where('user_id',$user_id)
                             ->withCount('tasks')
                             ->with('tasks')->get(); //dd($projects->toArray());
-
-        if(!empty($projects)){
-            return ProjectResource::collection($projects);
+        
+        if(Gate::allows('isSEM') || Gate::allows('isClient')){
+            if($projects){
+                return ProjectResource::collection($projects);
+            }    
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 
@@ -55,19 +62,25 @@ class ProjectsController extends Controller
      */
     public function store(ProjectStoreRequest $request) 
     {
-        $project = new Project();
-        $project->user_id = Auth::user()->id; 
-        $project->title = $request->title;
-        $project->due_date = $request->due_date;
-        $project->status = $request->status;
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $project = new Project();
+            $project->user_id = Auth::user()->id; 
+            $project->title = $request->title;
+            $project->due_date = $request->due_date;
+            $project->status = $request->status;
 
-        if($project->save()){
-            return new ProjectResource($project);
+            if($project->save()){
+                return new ProjectResource($project);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'Project save Failed'
+            ], 422);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Project save Failed'
-        ], 422);
+            'message' => 'Permission denied !'
+        ], 200);   
     }
 
     /**
@@ -78,14 +91,20 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-        $user_id = Auth::user()->id;
-        $project = Project::with('tasks')->where('user_id',$user_id)->where('id',$id)->first();
-        if(!empty($project)){
-            return new ProjectResource($project);
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $user_id = Auth::user()->id;
+            $project = Project::with('tasks')->where('user_id',$user_id)->where('id',$id)->first();
+            if(!empty($project)){
+                return new ProjectResource($project);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 
@@ -109,16 +128,23 @@ class ProjectsController extends Controller
      */
     public function update(UpdateProjectRequest $request, $id)
     { 
-        $project = Project::findOrFail($id);
-        if(!empty($project)){
-            $project->update($request->validated());
-            return new ProjectResource($project);
-        }
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $project = Project::findOrFail($id);
+            if(!empty($project)){
+                $project->update($request->validated());
+                return new ProjectResource($project);
+            }
 
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
+        }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
+
     }
 
     /**
@@ -129,35 +155,54 @@ class ProjectsController extends Controller
      */
     public function destroy($id)
     {
-        $user_id = Auth::user()->id;
-        $project = Project::find($id); 
-        
-        if(!empty($project)){
-            $project->delete();
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $user_id = Auth::user()->id;
+            $project = Project::find($id); 
+            
+            if(!empty($project)){
+                $project->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Record deleted successfully'
+                ], 200);
+            }
             return response()->json([
-                'status' => true,
-                'message' => 'Record deleted successfully'
+                'status' => false,
+                'message' => 'No record found'
             ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No record found'
+            'message' => 'Permission denied !'
         ], 200);
+
     }
 
     public function removeRecords()
     {
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            return response()->json([
+                'status' => DeleteProjectJob::dispatch(),
+                'message' => 'Project deletion is started'
+            ]);
+        }
         return response()->json([
-            'status' => DeleteProjectJob::dispatch(),
-            'message' => 'Project deletion is started'
-        ]);
+            'status' => false,
+            'message' => 'Permission denied !'
+        ], 200);
     }
 
     public function updateStatus()
     {
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            return response()->json([
+                'status' => UpdateProjectStatus::dispatch(),
+                'message' => 'Project status updation is started'
+            ]);
+        }
         return response()->json([
-            'status' => UpdateProjectStatus::dispatch(),
-            'message' => 'Project status updation is started'
-        ]);
+            'status' => false,
+            'message' => 'Permission denied !'
+        ], 200);
     }
 }

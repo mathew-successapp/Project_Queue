@@ -10,6 +10,7 @@ use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Requests\CreateTaskRequest;
 use App\Http\Requests\AssignTaskRequest;
 use App\Http\Resources\TaskResource;
+use Illuminate\Support\Facades\Gate;
 
 class TasksController extends Controller
 {
@@ -20,14 +21,20 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $task = Tasks::with('project')->get();
+        if(Gate::allows('isSEM') || Gate::allows('isClient')){
+            $task = Tasks::with('project')->get();
 
-        if(!empty($task)){
-            return TaskResource::collection($task);
+            if(!empty($task)){
+                return TaskResource::collection($task);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 
@@ -43,15 +50,21 @@ class TasksController extends Controller
 
     public function assign(AssignTaskRequest $request, $id)
     {
-        $task = Tasks::find($id); 
-        if(!empty($task)){
-            $task->assignee_id = $request->assignee_id;
-            $task->save();
-            return new TaskResource($task);
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $task = Tasks::find($id); 
+            if(!empty($task)){
+                $task->assignee_id = $request->assignee_id;
+                $task->save();
+                return new TaskResource($task);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 
@@ -63,20 +76,26 @@ class TasksController extends Controller
      */
     public function store(TaskStoreRequest $request)
     {
-        $task = new Tasks();
-        $task->title = $request->title;
-        $task->project_id = $request->project_id;
-        $task->description = $request->description;
-        $task->due_date = $request->due_date;
-        $task->assignee_id = $request->assignee_id;
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $task = new Tasks();
+            $task->title = $request->title;
+            $task->project_id = $request->project_id;
+            $task->description = $request->description;
+            $task->due_date = $request->due_date;
+            $task->assignee_id = $request->assignee_id;
 
-        if($task->save()){
-            return new TaskResource($task);
+            if($task->save()){
+                return new TaskResource($task);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'Task creation Failed'
+            ], 422);
         }
         return response()->json([
             'status' => false,
-            'message' => 'Task creation Failed'
-        ], 422);
+            'message' => 'Permission denied !'
+        ], 200);
     }
 
     /**
@@ -117,14 +136,20 @@ class TasksController extends Controller
      */
     public function update(TaskUpdateRequest $request, $id)
     {
-        $task = Tasks::find($id); 
-        if(!empty($task)){ 
-            $task->update($request->validated());
-            return new TaskResource($task);
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $task = Tasks::find($id); 
+            if(!empty($task)){ 
+                $task->update($request->validated());
+                return new TaskResource($task);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'No records found'
+            ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No records found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 
@@ -136,18 +161,24 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task = Tasks::find($id);
+        if(Gate::allows('isSEM') || Gate::allows('isSE')){
+            $task = Tasks::find($id);
 
-        if(!empty($task)){
-            $task->delete();
+            if(!empty($task)){
+                $task->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Record deleted successfully'
+                ], 200);
+            }
             return response()->json([
-                'status' => true,
-                'message' => 'Record deleted successfully'
+                'status' => false,
+                'message' => 'No record found'
             ], 200);
         }
         return response()->json([
             'status' => false,
-            'message' => 'No record found'
+            'message' => 'Permission denied !'
         ], 200);
     }
 }
